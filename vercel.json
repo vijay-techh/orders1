@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1",
+      "missing": [
+        {
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/server/server.js"
+    }
+  ]
+}
