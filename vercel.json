@@ -9,18 +9,14 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/server/server.js",
-      "type": "host"
+      "destination": "/server/server.js"
     },
     {
       "source": "/(.*)",
       "destination": "/public/$1",
       "missing": [
-        {
-          "type": "file"
-        }
-      ],
-      "type": "host"
+        { "type": "file" }
+      ]
     }
   ]
 }
