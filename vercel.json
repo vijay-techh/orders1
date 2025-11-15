@@ -15,7 +15,7 @@
       "source": "/(.*)",
       "destination": "/public/$1",
       "missing": [
-        { "type": "file" }
+        { "type": "host" }
       ]
     }
   ]
