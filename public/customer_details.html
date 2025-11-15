@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Details</title>
+  <style>
+    body { font-family: Arial; background:#f4f4f4; padding:20px; }
+    .box { max-width:1000px; margin:0 auto; background:white; padding:20px;
+           border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.1); }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    th,td { border:1px solid #ddd; padding:10px; }
+    th { background:#eee; }
+    .back { padding:8px 12px; background:#ddd; border-radius:6px;
+            text-decoration:none; color:black; }
+    #searchBox { padding:10px; width:100%; margin-top:20px; }
+    .item { padding:10px; border-bottom:1px solid #eee; cursor:pointer; font-size:16px; }
+    .item:hover { background:#f1f1f1; }
+    h3 { margin-top:25px; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <a class="back" href="home.html">← Back</a>
+  <h2>Customer Details</h2>
+
+  <!-- Search + List -->
+  <div id="searchMode">
+    <h3>All Customers</h3>
+    <input id="searchBox" placeholder="Search by name or phone..." onkeyup="searchCustomers()">
+    <div id="results"></div>
+  </div>
+
+  <!-- Customer Details Section -->
+  <div id="detailsMode" style="display:none;">
+    <h3 id="custName"></h3>
+    <p id="custPhone"></p>
+    <p id="custAddress"></p>
+
+    <h3>Orders</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Rent Start</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody"></tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<script>
+function getCustomerId() {
+  const p = new URLSearchParams(window.location.search);
+  return p.get("customerId");
+}
+
+// ---------------------------
+// Load specific customer
+// ---------------------------
+async function loadCustomerDetails(id) {
+  const r = await fetch(`/api/customer-details?id=${id}`);
+  const data = await r.json();
+
+  if (!data.success) {
+    alert("Customer not found");
+    return;
+  }
+
+document.getElementById("searchMode").style.display = "none";
+document.getElementById("detailsMode").style.display = "block";
+
+  document.getElementById("custName").textContent = data.customer.name;
+  document.getElementById("custPhone").textContent = "Phone: " + data.customer.phone;
+  document.getElementById("custAddress").textContent = data.customer.address;
+
+  const body = document.getElementById("ordersBody");
+  body.innerHTML = "";
+
+  data.orderDetails.forEach(o => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${o.order.order_date}</td>
+      <td>${o.order.rent_start || "-"}</td>
+      <td>₹ ${o.order.total}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+// -------------------------------------------
+// Load ALL customers on page open
+// -------------------------------------------
+async function loadAllCustomers() {
+  const r = await fetch(`/api/customers?q=`);
+  const data = await r.json();
+
+  const box = document.getElementById("results");
+  box.innerHTML = "";
+
+  data.rows.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.textContent = `${c.name} — ${c.phone}`;
+    div.onclick = () => {
+      window.location.href = `customer_details.html?customerId=${c.id}`;
+    };
+    box.appendChild(div);
+  });
+}
+
+// -------------------------------------------
+// Search customers live
+// -------------------------------------------
+async function searchCustomers() {
+  const q = document.getElementById("searchBox").value;
+  const r = await fetch(`/api/customers?q=${q}`);
+  const data = await r.json();
+
+  const box = document.getElementById("results");
+  box.innerHTML = "";
+
+  data.rows.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.textContent = `${c.name} — ${c.phone}`;
+    div.onclick = () => {
+      window.location.href = `customer_details.html?customerId=${c.id}`;
+    };
+    box.appendChild(div);
+  });
+}
+
+// -------------------------------------------
+// MAIN
+// -------------------------------------------
+const id = getCustomerId();
+
+if (!id) {
+  // No ID → show all customers
+  loadAllCustomers();
+} else {
+  // Load single customer data
+  loadCustomerDetails(id);
+}
+
+</script>
+
+</body>
+</html>
